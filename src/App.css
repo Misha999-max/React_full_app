@@ -1,0 +1,47 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.header {
+  padding: 20px 10px;
+  background-color: #dbd8d8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header-title {
+  font-size: 30px;
+  color: rgb(143, 148, 143);
+}
+.header-time {
+  color: rgb(143, 148, 143);
+  font-size: 30px;
+}
+.main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 10px 20px;
+}
+.main-btn {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.main-btn button {
+  margin-right: 20px;
+}
+.ampty-string {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+  color: red;
+  font-size: 40px;
+}
+.searcInput {
+  margin: 30px auto;
+  max-width: 700px;
+}

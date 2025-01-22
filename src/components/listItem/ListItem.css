@@ -1,0 +1,33 @@
+li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+li div {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+li div > span {
+	margin-left: 30px;
+}
+li div input:first-child {
+	margin-right: 20px;
+}
+li {
+	padding: 7px 15px;
+}
+li p {
+	color: chocolate;
+	font-size: 28px;
+}
+li p.delete-item {
+	text-decoration: line-through;
+	color: rgba(117, 114, 114, 0.6);
+}
+
+li p.active-item {
+	font-size: 30px;
+	color: green;
+}
