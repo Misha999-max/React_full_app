@@ -15,7 +15,6 @@ function App() {
 
   function handleChange(value) {
     setValue(value);
-    console.log(value);
   }
 
   function handleSearchTodo(value) {
@@ -29,7 +28,8 @@ function App() {
       text: value,
       id: Date.now(),
       isCompleted: false,
-      isActive: false,
+      isActive: true,
+      start: 0,
       timeAdded: new Date(),
     };
     setData([...data, todos]);
@@ -52,15 +52,9 @@ function App() {
   }
 
   function handleCompleteItem(id) {
-    const showFilterDelete = data.filter((item) => item.id !== id);
-    const isDeleteData = data.find((item) => item.id === id);
-    if (isDeleteData) {
-      isDeleteData.isCompleted = !isDeleteData.isCompleted;
-      if (isDeleteData.isActive) {
-        isDeleteData.isActive = !isDeleteData.isActive;
-      }
-    }
-    setData([...showFilterDelete, isDeleteData]);
+    setData((prevData) =>
+      prevData.map((item) => (item.id === id ? { ...item, isCompleted: !item.isCompleted, isActive: false } : item))
+    );
   }
 
   function handleDeleteItem(id) {
@@ -68,17 +62,15 @@ function App() {
     setShowAll(data);
   }
 
-  const handleChangeActive = (id) => {
-    const showFilterActive = data.filter((item) => item.id !== id);
-    const isActiveData = data.find((item) => item.id === id);
-    if (isActiveData) {
-      isActiveData.isActive = !isActiveData.isActive;
-      if (isActiveData.isCompleted) {
-        isActiveData.isCompleted = !isActiveData.isCompleted;
-      }
-    }
-    setData([...showFilterActive, isActiveData]);
-  };
+  function handleChangeActive(id) {
+    setData((prevData) =>
+      prevData.map((item) =>
+        item.id === id
+          ? { ...item, isActive: !item.isActive, isCompleted: item.isCompleted ? false : item.isCompleted }
+          : item
+      )
+    );
+  }
 
   return (
     <div>
