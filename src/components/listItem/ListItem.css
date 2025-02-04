@@ -34,5 +34,28 @@ li p.active-item {
 .timer_zone span {
   color: brown;
   font-size: 20px;
-  margin-left: 20px;
+  margin-left: 10px;
+}
+
+li div input:hover {
+  cursor: pointer;
+}
+
+.start__span,
+.stop__span {
+  display: inline-block;
+  margin-right: 20px;
+  margin-left: -10px;
+  font-size: 20px;
+  transition: all 0.3s ease;
+}
+.start__span {
+  color: green;
+}
+.stop__span {
+  color: orange;
+}
+.start__span,
+.stop__span:hover {
+  transform: scale(1.1);
 }

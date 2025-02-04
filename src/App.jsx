@@ -20,6 +20,7 @@ function App() {
   function handleSearchTodo(value) {
     setValueSearch(value);
     setShowDate(data.filter((item) => item.text.includes(value)));
+    setShowAll(false);
   }
 
   function handleClickAdd() {
@@ -28,12 +29,13 @@ function App() {
       text: value,
       id: Date.now(),
       isCompleted: false,
-      isActive: true,
+      isActive: false,
       start: 0,
       timeAdded: new Date(),
     };
     setData([...data, todos]);
     setValue('');
+    setShowAll(true);
   }
 
   function handleShowDeletedToDo() {

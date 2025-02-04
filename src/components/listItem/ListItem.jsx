@@ -1,6 +1,7 @@
 import Button from '../button/Button';
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
+import debounce from 'lodash.debounce';
 import './ListItem.css';
 
 export default function ListItem({ item, onCompleted, onDelete, onChangeActive }) {
@@ -19,13 +20,28 @@ export default function ListItem({ item, onCompleted, onDelete, onChangeActive }
   });
   const [timerActive, setTimerActive] = useState(true);
 
+  const debouncedSetStart = debounce((setStart, newStart) => {
+    setStart(newStart);
+  }, 1000);
+
+  const debouncedSetLocalStorage = debounce((key, value) => {
+    localStorage.setItem(key, value);
+  }, 1000);
+
   useEffect(() => {
     let timerStartCoute;
+    console.log('Timer Active:', timerActive);
+    console.log('Item Active:', item.isActive);
     if (timerActive && item.isActive) {
       timerStartCoute = setInterval(() => {
         setStart((prevStart) => {
-          const newStart = prevStart + 30;
-          localStorage.setItem(`timerStart-${item.id}`, newStart);
+          const newStart = prevStart + 1;
+          console.log('Updated Start:', newStart); // Отладочное сообщение
+          debouncedSetStart(setStart, newStart);
+          // Оптимизация: обновляем localStorage каждые 5 секунд
+          if (newStart % 5000 === 0) {
+            debouncedSetLocalStorage(`timerStart-${item.id}`, newStart);
+          }
           return newStart;
         });
       }, 1000);
@@ -38,7 +54,10 @@ export default function ListItem({ item, onCompleted, onDelete, onChangeActive }
     if (start >= 60) {
       setTimerMin((prevMin) => {
         const newMin = prevMin + 1;
-        localStorage.setItem(`timerMin-${item.id}`, newMin); // Сохраняем в localStorage
+        // Оптимизация: обновляем localStorage каждые 5 минут
+        if (newMin % 5 === 0) {
+          debouncedSetLocalStorage(`timerStart-${item.id}`, newMin);
+        }
         return newMin;
       });
       setStart(0);
@@ -48,15 +67,18 @@ export default function ListItem({ item, onCompleted, onDelete, onChangeActive }
       setTimerMin(0);
       setTimerHours((prevHours) => {
         const newHours = prevHours + 1;
-        localStorage.setItem(`timerHours-${item.id}`, newHours); // Сохраняем в localStorage
+        // Оптимизация: обновляем localStorage каждые 1 час
+        localStorage.setItem(`timerHours-${item.id}`, newHours);
         return newHours;
       });
     }
   }, [start, timerMin, timerHours, item.id]);
 
   const handleComplete = () => {
+    // onChangeActive(item.id);
     setTimerActive(false); // Останавливаем таймер
     onCompleted(item.id); // Вызываем функцию onCompleted
+    localStorage.delete(`timerStart-${item.id}`);
   };
 
   useEffect(() => {
@@ -65,10 +87,10 @@ export default function ListItem({ item, onCompleted, onDelete, onChangeActive }
     }
   }, [item.isActive]);
 
-  useEffect(() => {
-    console.log('Timer Active:', timerActive);
-    console.log('Item Active:', item.isActive);
-  }, [timerActive, item.isActive]);
+  // useEffect(() => {
+  //   console.log('Timer Active:', timerActive);
+  //   console.log('Item Active:', item.isActive);
+  // }, [timerActive, item.isActive]);
 
   return (
     <li>
@@ -76,15 +98,20 @@ export default function ListItem({ item, onCompleted, onDelete, onChangeActive }
         <p className={item.isCompleted ? 'delete-item' : item.isActive ? 'active-item' : ''}>{item.text}</p>
         <span>Добавленно: {item.timeAdded.toLocaleTimeString()}</span>
         <div className="timer_zone">
-          <span>{timerActive ? 'выполнение задания....' : `Выполненно за ${timerHours}ч:${timerMin}м`}</span>
+          <span>
+            {timerActive
+              ? `выполнение задания... ${timerHours}ч:${timerMin}м:${start}сек`
+              : `Выполненно за ${timerHours}ч:${timerMin}м:${start}сек`}
+          </span>
         </div>
       </div>
       <div>
-        <input type="checkbox" checked={item.isActive} onChange={() => onChangeActive(item.id)} />
+        <input id="start_id" type="checkbox" checked={item.isActive} onChange={() => onChangeActive(item.id)} />
+        {!item.isActive ? <span className="start__span">НАЧАТЬ</span> : <span className="stop__span">СТОП</span>}
         <Button
           text="Выполнено"
           onClick={() => {
-            handleComplete();
+            handleComplete(item.id);
           }}
         />
         <Button className="deleteItem" text="Delete" onClick={() => onDelete(item.id)} />
