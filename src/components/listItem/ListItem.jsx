@@ -1,91 +1,79 @@
 import Button from '../button/Button';
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
-import debounce from 'lodash.debounce';
+import { useReducer, useEffect } from 'react';
+// import debounce from 'lodash.debounce';
 import './ListItem.css';
 
+// ======================= useReducer =======================
+
+const initialState = {
+  start: 0,
+  timerMin: 0,
+  timerHours: 0,
+  timerActive: true,
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'SET_START':
+      return { ...state, start: action.payload };
+    case 'INCREMENT_START':
+      return { ...state, start: state.start + 1 };
+    case 'SET_TIMER_MIN':
+      return { ...state, timerMin: action.payload };
+    case 'SET_TIMER_HOURS':
+      return { ...state, timerHours: action.payload };
+    case 'TOGGLE_TIMER_ACTIVE':
+      return { ...state, timerActive: !state.timerActive };
+    default:
+      return state;
+  }
+}
+
 export default function ListItem({ item, onCompleted, onDelete, onChangeActive }) {
-  const [start, setStart] = useState(() => {
-    const savedStart = localStorage.getItem(`timerStart-${item.id}`);
-    return savedStart ? parseInt(savedStart, 10) : 0; // Инициализируем из localStorage
-  });
-  // const [result, setResult] = useState(null);
-  const [timerMin, setTimerMin] = useState(() => {
-    const savedMin = localStorage.getItem(`timerMin-${item.id}`);
-    return savedMin ? parseInt(savedMin, 10) : 0; // Инициализируем из localStorage
-  });
-  const [timerHours, setTimerHours] = useState(() => {
-    const savedHours = localStorage.getItem(`timerHours-${item.id}`);
-    return savedHours ? parseInt(savedHours, 10) : 0; // Инициализируем из localStorage
-  });
-  const [timerActive, setTimerActive] = useState(true);
-
-  const debouncedSetStart = debounce((setStart, newStart) => {
-    setStart(newStart);
-  }, 1000);
-
-  const debouncedSetLocalStorage = debounce((key, value) => {
-    localStorage.setItem(key, value);
-  }, 1000);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    let timerStartCoute;
-    console.log('Timer Active:', timerActive);
+    let timerStartCount;
+    console.log('Timer Active:', state.timerActive);
     console.log('Item Active:', item.isActive);
-    if (timerActive && item.isActive) {
-      timerStartCoute = setInterval(() => {
-        setStart((prevStart) => {
-          const newStart = prevStart + 1;
-          console.log('Updated Start:', newStart); // Отладочное сообщение
-          debouncedSetStart(setStart, newStart);
-          // Оптимизация: обновляем localStorage каждые 5 секунд
-          if (newStart % 5000 === 0) {
-            debouncedSetLocalStorage(`timerStart-${item.id}`, newStart);
-          }
-          return newStart;
-        });
+    if (state.timerActive && item.isActive) {
+      timerStartCount = setInterval(() => {
+        dispatch({ type: 'INCREMENT_START' });
+        localStorage.setItem(`timerStart-${item.id}`, state.start + 1);
       }, 1000);
     }
-
-    return () => clearInterval(timerStartCoute);
-  }, [timerActive, item.isActive, item.id]);
+    return () => clearInterval(timerStartCount);
+  }, [state.timerActive, item.isActive]);
 
   useEffect(() => {
-    if (start >= 60) {
-      setTimerMin((prevMin) => {
-        const newMin = prevMin + 1;
-        // Оптимизация: обновляем localStorage каждые 5 минут
-        if (newMin % 5 === 0) {
-          debouncedSetLocalStorage(`timerStart-${item.id}`, newMin);
-        }
-        return newMin;
-      });
-      setStart(0);
+    if (state.start >= 60) {
+      dispatch({ type: 'SET_TIMER_MIN', payload: state.timerMin + 1 });
+      dispatch({ type: 'SET_START', payload: 0 });
     }
+    localStorage.setItem(`timerMin-${item.id}`, state.timerMin);
+  }, [state.start]);
 
-    if (timerMin >= 60) {
-      setTimerMin(0);
-      setTimerHours((prevHours) => {
-        const newHours = prevHours + 1;
-        // Оптимизация: обновляем localStorage каждые 1 час
-        localStorage.setItem(`timerHours-${item.id}`, newHours);
-        return newHours;
-      });
+  useEffect(() => {
+    if (state.timerMin >= 60) {
+      dispatch({ type: 'SET_TIMER_HOURS', payload: state.timerHours + 1 });
+      dispatch({ type: 'SET_TIMER_MIN', payload: 0 });
     }
-  }, [start, timerMin, timerHours, item.id]);
+    localStorage.setItem(`timerHours-${item.id}`, state.timerHours);
+  }, [state.timerMin]);
 
   const handleComplete = () => {
     // onChangeActive(item.id);
-    setTimerActive(false); // Останавливаем таймер
+    dispatch({ type: 'TOGGLE_TIMER_ACTIVE' }); // Останавливаем таймер
     onCompleted(item.id); // Вызываем функцию onCompleted
     localStorage.delete(`timerStart-${item.id}`);
   };
 
-  useEffect(() => {
-    if (item.isActive) {
-      setTimerActive(true); // Запускаем таймер, если задача активна
-    }
-  }, [item.isActive]);
+  // useEffect(() => {
+  //   if (item.isActive) {
+  //     setTimerActive(true); // Запускаем таймер, если задача активна
+  //   }
+  // }, [item.isActive]);
 
   // useEffect(() => {
   //   console.log('Timer Active:', timerActive);
@@ -99,9 +87,9 @@ export default function ListItem({ item, onCompleted, onDelete, onChangeActive }
         <span>Добавленно: {item.timeAdded.toLocaleTimeString()}</span>
         <div className="timer_zone">
           <span>
-            {timerActive
-              ? `выполнение задания... ${timerHours}ч:${timerMin}м:${start}сек`
-              : `Выполненно за ${timerHours}ч:${timerMin}м:${start}сек`}
+            {state.timerActive
+              ? `выполнение задания... ${state.timerHours}ч:${state.timerMin}м:${state.start}сек`
+              : `Выполненно за ${state.timerHours}ч:${state.timerMin}м:${state.start}сек`}
           </span>
         </div>
       </div>
