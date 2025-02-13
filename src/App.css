@@ -45,3 +45,30 @@
   margin: 30px auto;
   max-width: 700px;
 }
+
+.form_add {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 2px solid black;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  padding: 10px 20px;
+}
+.form_add > input {
+  margin-left: 20px;
+  color: #fff9f9;
+}
+.form_add > input:not(:first-child) {
+  max-width: 100px;
+  background-color: #fff;
+  border: none;
+  outline: none;
+  color: black;
+}
+
+.form_add > label {
+  margin-left: 20px;
+  font-size: 30px;
+  color: rgb(224, 173, 118);
+}
