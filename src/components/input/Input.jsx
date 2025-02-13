@@ -2,11 +2,11 @@ import PropTypes from 'prop-types';
 
 import './input.css';
 
-export default function Input({ value, type, maxLength, onChange, disc }) {
+export default function Input({ value, onChange, disc }) {
   return (
     <input
-      type={type ? type : 'text'}
-      maxLength={maxLength ? maxLength : Infinity}
+      type="text"
+      // maxLength={maxLength ? maxLength : Infinity}
       value={value}
       className=""
       placeholder={disc}
@@ -17,8 +17,8 @@ export default function Input({ value, type, maxLength, onChange, disc }) {
 
 Input.propTypes = {
   value: PropTypes.string,
-  maxLength: PropTypes.string,
-  type: PropTypes.string,
+  // maxLength: PropTypes.string,
+  // type: PropTypes.string,
   disc: PropTypes.string,
   onChange: PropTypes.func.isRequired,
 };

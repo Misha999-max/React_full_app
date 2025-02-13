@@ -19,7 +19,6 @@ function App() {
   const [showAllBtnActive, setShowAllBtnActive] = useState(false);
 
   function handleChangeValue(event) {
-    console.log(event.target.name);
     setValue(event.target.value);
   }
 
@@ -32,6 +31,7 @@ function App() {
   }
 
   function handleSearchTodo(value) {
+    console.log(value);
     setValueSearch(value);
     setShowDate(data.filter((item) => item.text.includes(value)));
     setShowAll(false);
@@ -124,7 +124,7 @@ function App() {
       <Header />
       <div className="searcInput">
         <h3>Поиск</h3>
-        <Input value={valueSearch} onChange={(e) => handleSearchTodo(e)} disc="Поле поиска" />
+        <Input value={valueSearch} type="text" onChange={(e) => handleSearchTodo(e.target.value)} disc="Поле поиска" />
       </div>
       <div className="main">
         <form className="form_add" onKeyDown={(event) => createTaskToDo(event)}>
